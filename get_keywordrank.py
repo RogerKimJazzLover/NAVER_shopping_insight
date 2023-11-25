@@ -23,7 +23,7 @@ header = {
     "Content-Type" : "application/x-www-form-urlencoded; charset=UTF-8"
 }
 
-def GetDate():
+def GetEndDate():
     '''
     어제의 날짜를 panda의 timestamp 형식으로 반환 합니다.
     쇼핑인사이트 데이터는 어제의 것만 제공 되는 것 같습니다.
@@ -33,13 +33,18 @@ def GetDate():
     today -= pd.to_timedelta(1, 'D')
     return today
 
-def GetDateLastWeek(today):
+def GetStartDate(today, time_period):
     '''
     주어진 날짜(today)로 부터 일주일 전의 날짜를 panda의 timestamp 형식으로 반환 합니다.
     '''
-    for i in range(7):
-        today -= pd.to_timedelta(1, 'D')
-    return today
+    if time_period == "d":
+        return today
+    elif time_period == "w":
+        for i in range(7):
+            today -= pd.to_timedelta(1, 'D')
+        return today
+    else:
+        return today - pd.DateOffset(months=1)
     
 def GetSubCategory(cid):
     '''
@@ -66,30 +71,32 @@ def GetKeyWordRank(cid, startDate, endDate):
     return response.json()
 
 def main():
-    keywords_arr = {}
+    result_keyword = {}
 
-    yesterday = GetDate()
-    startDate = GetDateLastWeek(yesterday)
-    
+    time_period = input("Day, Week, or a Month? 'd' for day, 'w' for week, 'm' for month. \n$: ")
+
+    #Gets the dates in panda's timestamp form
+    endDate = GetEndDate()
+    startDate = GetStartDate(endDate, time_period)
     #Turns each dates from, panda's timestamp data structure, to string
     startDate = startDate.strftime('%Y-%m-%d')
-    endDate = yesterday.strftime('%Y-%m-%d')
+    endDate = endDate.strftime('%Y-%m-%d')
 
-    #adds information about the startDate and the endDate at the top of the keywords_arr dictionary
-    keywords_arr['startDate'] = startDate
-    keywords_arr['endDate'] = endDate
+    #adds information about the startDate and the endDate at the top of the result_keyword dictionary
+    result_keyword['startDate'] = startDate
+    result_keyword['endDate'] = endDate
 
     for cat_name, cat_id in cid_lists.items():
         print(cat_name)
-        res_dict = GetKeyWordRank(cat_id, startDate, endDate)
-        keywords_arr[cat_name] = [] #creates another item in the dictionary with the category's name as the key, and an empty array as the value.
+        temporary_dict = GetKeyWordRank(cat_id, startDate, endDate) #Get the top 10 keywords into temporary_dict dictionary. This dictionary only stores the top 10 keywords of one category.
+        result_keyword[cat_name] = [] #creates another item in the dictionary with the category's name as the key, and an empty array as the value.
         for i in range(10):
             #appends each category into the empty array that was just created
-            keywords_arr[cat_name].append(res_dict['ranks'][i]['keyword'])
-        time.sleep(1) #without this, the server doesn't respond after the 생활/건강
+            result_keyword[cat_name].append(temporary_dict['ranks'][i]['keyword'])
+        time.sleep(0.3) #without this, the server doesn't respond after the 생활/건강
         
     #pretty prints the resulting dictionary
-    pprint.pprint(keywords_arr)
+    pprint.pprint(result_keyword)
 
 if __name__ == "__main__":
     main()

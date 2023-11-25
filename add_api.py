@@ -1,3 +1,8 @@
+'''
+This code is incomplete!
+IT WON'T WORK!
+미완성 파일 입니다.
+'''
 
 import urllib.request
 import json

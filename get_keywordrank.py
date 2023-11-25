@@ -1,6 +1,14 @@
-import requests, pprint, time
+import requests, pprint, time, json
 from datetime import date
 import pandas as pd
+
+'''
+Search criterias
+device = pc/mo
+gender = f/m
+age = 10,20,30...60
+Total Combination: 240 for each category
+'''
 
 cid_lists = {
     "패션의류":50000000,
@@ -26,7 +34,6 @@ header = {
 def GetEndDate():
     '''
     어제의 날짜를 panda의 timestamp 형식으로 반환 합니다.
-    쇼핑인사이트 데이터는 어제의 것만 제공 되는 것 같습니다.
     '''
     today = date.today()
     today = pd.to_datetime(today)
@@ -35,7 +42,7 @@ def GetEndDate():
 
 def GetStartDate(today, time_period):
     '''
-    주어진 날짜(today)로 부터 일주일 전의 날짜를 panda의 timestamp 형식으로 반환 합니다.
+    주어진 날짜(today)로 부터 일주일/한달 전의 날짜를 panda의 timestamp 형식으로 반환 합니다.
     '''
     if time_period == "d":
         return today
@@ -65,22 +72,17 @@ def GetKeyWordRank(cid, startDate, endDate):
     returns: response.json, the response from the server in json format
     '''
     global header
-    data = f"cid={cid}&timeUnit=date&startDate={startDate}&endDate={endDate}&page=1&count=10"
+    data = f"cid={cid}&timeUnit=date&startDate={startDate}&endDate={endDate}&age=&gender=&device=&page=1&count=10"
     url = "https://datalab.naver.com/shoppingInsight/getCategoryKeywordRank.naver"
     response = requests.post(url=url, headers=header, data=data)
     return response.json()
 
-def main():
+def GetJSON(startDate, endDate):
+    '''
+    Return JSON file that contains the top 10 searcheds keywords for each categories.
+    '''
+    global cid_lists
     result_keyword = {}
-
-    time_period = input("Day, Week, or a Month? 'd' for day, 'w' for week, 'm' for month. \n$: ")
-
-    #Gets the dates in panda's timestamp form
-    endDate = GetEndDate()
-    startDate = GetStartDate(endDate, time_period)
-    #Turns each dates from, panda's timestamp data structure, to string
-    startDate = startDate.strftime('%Y-%m-%d')
-    endDate = endDate.strftime('%Y-%m-%d')
 
     #adds information about the startDate and the endDate at the top of the result_keyword dictionary
     result_keyword['startDate'] = startDate
@@ -94,9 +96,22 @@ def main():
             #appends each category into the empty array that was just created
             result_keyword[cat_name].append(temporary_dict['ranks'][i]['keyword'])
         time.sleep(0.3) #without this, the server doesn't respond after the 생활/건강
-        
-    #pretty prints the resulting dictionary
-    pprint.pprint(result_keyword)
+
+    return json.dumps(result_keyword, indent=4, ensure_ascii=False) #Turns dictionary into json file. 'ensure_ascii=False' is to solve bugs with Korean characters.
+
+def main():
+    time_period = input("Day, Week, or a Month? 'd' for day, 'w' for week, 'm' for month. \n$: ")
+
+    #Gets the dates in panda's timestamp form
+    endDate = GetEndDate()
+    startDate = GetStartDate(endDate, time_period)
+    #Turns each dates from, panda's timestamp data structure, to string
+    startDate = startDate.strftime('%Y-%m-%d')
+    endDate = endDate.strftime('%Y-%m-%d')
+
+    #Gets JSON file
+    result_keyword = GetJSON(startDate, endDate)
+    print(result_keyword)
 
 if __name__ == "__main__":
     main()

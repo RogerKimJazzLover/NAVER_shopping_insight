@@ -1,4 +1,5 @@
-import requests, pprint, time, json
+import requests, time, json
+from tabulate import tabulate
 from datetime import date
 import pandas as pd
 
@@ -99,8 +100,33 @@ def GetJSON(startDate, endDate):
 
     return json.dumps(result_keyword, indent=4, ensure_ascii=False) #Turns dictionary into json file. 'ensure_ascii=False' is to solve bugs with Korean characters.
 
+def GetCSV(startDate, endDate):
+    '''
+    Save the data in .csv file format
+    '''
+    global cid_lists
+    result_dataframe = {
+        "Category_name":[],
+        "Cat_id":[],
+        "Keywords":[]
+    }
+    for cat_name, cat_id in cid_lists.items():
+        print(cat_name)
+        temporary_dict = GetKeyWordRank(cat_id, startDate, endDate) #Get the top 10 keywords into temporary_dict dictionary. This dictionary only stores the top 10 keywords of one category.
+        for i in range(10):
+            #appends name and id of each category name to the "Category_name" and "Cat_id" column.
+            result_dataframe["Category_name"].append(cat_name)
+            result_dataframe["Cat_id"].append(cat_id)
+            #appends each keywords into the "Keywords" column
+            result_dataframe["Keywords"].append(temporary_dict['ranks'][i]['keyword'])
+        time.sleep(0.3) #without this, the server doesn't respond after the 생활/건강
+    
+    return pd.DataFrame(result_dataframe)
+
+
 def main():
-    time_period = input("Day, Week, or a Month? 'd' for day, 'w' for week, 'm' for month. \n$: ")
+    # time_period = input("Day, Week, or a Month? 'd' for day, 'w' for week, 'm' for month. \n$: ")
+    time_period = "d"
 
     #Gets the dates in panda's timestamp form
     endDate = GetEndDate()
@@ -112,6 +138,12 @@ def main():
     #Gets JSON file
     result_keyword = GetJSON(startDate, endDate)
     print(result_keyword)
+
+    #Gets CSV file
+    result_dataframe = GetCSV(startDate, endDate)
+    print(tabulate(result_dataframe, headers='keys', tablefmt='psql'))
+    result_dataframe.to_csv(f"./data/{time_period}_top10_keywords.csv", encoding="euc-kr", index=False) #saves the data into the "data" directory
+    
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,4 @@
-import requests, time, json
+import requests, time, json, pprint
 from tabulate import tabulate
 from datetime import date
 import pandas as pd
@@ -56,7 +56,7 @@ def GetStartDate(today, time_period):
     
 def GetSubCategory(cid):
     '''
-    하나의 대분류 키워드 (패션의류, 패션잡화) 의 서브 카테고리를 제공합니다.
+    Returns a JSON variable containing the subcategory for the given category.
     '''
     #This header is NOT THE SAME as the global variable header. this just lacks the content type
     header = {
@@ -80,7 +80,7 @@ def GetKeyWordRank(cid, startDate, endDate):
 
 def GetJSON(startDate, endDate):
     '''
-    Return JSON file that contains the top 10 searcheds keywords for each categories.
+    Returns a JSON variable that contains the top 10 searcheds keywords for each categories.
     '''
     global cid_lists
     result_keyword = {}
@@ -102,7 +102,7 @@ def GetJSON(startDate, endDate):
 
 def GetCSV(startDate, endDate):
     '''
-    Save the data in .csv file format
+    Returns a dataframe variable that contains the top 10 searcheds keywords for each categories.
     '''
     global cid_lists
     result_dataframe = {
@@ -123,27 +123,22 @@ def GetCSV(startDate, endDate):
     
     return pd.DataFrame(result_dataframe)
 
-
 def main():
-    # time_period = input("Day, Week, or a Month? 'd' for day, 'w' for week, 'm' for month. \n$: ")
-    time_period = "d"
+    #'d' for day, 'w' for week, 'm' for month.
+    time_period = ['d', 'w', 'm']
 
-    #Gets the dates in panda's timestamp form
+    #1. Getting the startDate for each time period
     endDate = GetEndDate()
-    startDate = GetStartDate(endDate, time_period)
-    #Turns each dates from, panda's timestamp data structure, to string
-    startDate = startDate.strftime('%Y-%m-%d')
+    startDate = []
+    for i in range(3):
+        temp = GetStartDate(endDate, time_period[i])
+        startDate.append(temp.strftime('%Y-%m-%d')) #Turns the date from, panda's timestamp data structure, to string
     endDate = endDate.strftime('%Y-%m-%d')
 
-    #Gets JSON file
-    result_keyword = GetJSON(startDate, endDate)
-    print(result_keyword)
-
-    #Gets CSV file
-    result_dataframe = GetCSV(startDate, endDate)
-    print(tabulate(result_dataframe, headers='keys', tablefmt='psql'))
-    result_dataframe.to_csv(f"./data/{time_period}_top10_keywords.csv", encoding="euc-kr", index=False) #saves the data into the "data" directory
+    #2. Gets data frame then save as csv file, for each time_period(day, week and month)
+    for j in range(3):
+        result_dataframe = GetCSV(startDate[j], endDate)
+        result_dataframe.to_csv(f"./data/{time_period[j]}_top10_keywords.csv", encoding="euc-kr", index=False) #saves the data into the "data" directory
     
-
 if __name__ == "__main__":
     main()

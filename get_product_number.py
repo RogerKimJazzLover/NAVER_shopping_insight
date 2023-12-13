@@ -1,5 +1,5 @@
-from get_product_num import Browser
 from tabulate import tabulate
+from browser import Browser
 from urllib import parse
 import pandas as pd
 import time

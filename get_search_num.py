@@ -3,9 +3,10 @@
 from API_KEYS import * #SO DELETE THIS LINE!!!!!
 
 from tabulate import tabulate
-import pandas as pd
-import time, requests
 import hashlib, hmac, base64
+import time, requests
+import pandas as pd
+import custom_exceptions
 
 CUSTOMER_ID = ad_customer_id #type your own customer_id here. like,
 #CUSTOMER_ID = "your_customer_id"
@@ -13,14 +14,6 @@ API_KEY = ad_licence_key #type your own licence_key here.
 SECRET_KEY = ad_secret_key #type your own secret_key here.
 
 BASE_URL = "https://api.naver.com"
-
-class ResponseError(Exception):
-	'''
-	Custom error that is raised when the response code is not 200
-	'''
-	def __init__(self, message, value):
-		self.messaage = message
-		self.value = value
 
 def generate(timestamp, method, uri, secret_key):
 	'''
@@ -65,7 +58,7 @@ def GetNumSearch(keywords):
 		data_response = data_response['keywordList'][:5]
 		return data_response
 	else:
-		raise ResponseError("Response Error: ", response.status_code)
+		raise custom_exceptions.ResponseError("Response Error: ", response.status_code)
 
 def SortResponse(arr1, arr2):
 	'''

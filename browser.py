@@ -1,31 +1,29 @@
 from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
-import time
 
 class Browser:
     def __init__(self):
-        self.driver = webdriver.Chrome()
+        self.driver = self.SetProxy()
         self.driver.implicitly_wait(3)
+
+    def SetProxy(self):
+        '''
+        UNSUCCESSFUL!!!!!!!!!!!
+        '''
+        PROXY = "180.183.157.159:8080"
+
+        options = webdriver.ChromeOptions()
+        options.add_argument(f'--proxy-server={PROXY}')
+        chrome = webdriver.Chrome(options=options)
+        return chrome
 
     def goToPage(self,url):
         self.driver.get(url)
     
     def getPageSource(self):
         return self.driver.page_source
-    
-    def getPageSourceCond(self, element):
-        delay = 30
-        myElem = WebDriverWait(self.driver, delay).until(EC.presence_of_element_located((By.CLASS_NAME, element)))
-        return self.getPageSource()
 
     def scrollPageToBottom(self):
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-    def clearLink(self):
-        self.urlList = []
     
     def __del__(self):
         try:

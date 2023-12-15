@@ -31,7 +31,7 @@ def main():
     }
 
     browser = Browser()
-    #CURRENTLY UNSUCCESSFUL!!!!!!!!!!!1
+    browser.driver.get("https://www.google.com")
     for i in range(9):
         page_source = GetPageSource(browser, keywords[i])
         product_num = GetProductNumber(page_source)

@@ -1,6 +1,7 @@
-import requests, time, json, pprint
+import requests, time, json, pprint, sys
 from tabulate import tabulate
 from datetime import date
+from tqdm import tqdm
 import pandas as pd
 
 '''
@@ -32,9 +33,18 @@ header = {
     "Content-Type" : "application/x-www-form-urlencoded; charset=UTF-8"
 }
 
+def DisplayTimer(t: int):
+    '''
+    Prints out the timer into the terminal
+    '''
+    for i in range(t,0,-1):
+        sys.stdout.write(str(i)+' ')
+        sys.stdout.flush()
+        time.sleep(1)
+
 def GetEndDate():
     '''
-    어제의 날짜를 panda의 timestamp 형식으로 반환 합니다.
+    Returns yesterday in panda's timestamp variable
     '''
     today = date.today()
     today = pd.to_datetime(today)
@@ -43,9 +53,10 @@ def GetEndDate():
 
 def GetStartDate(today, time_period):
     '''
-    주어진 날짜(today)로 부터 일주일/한달 전의 날짜를 panda의 timestamp 형식으로 반환 합니다.
+    Returns a day/week/month ago from the given argument: today, in panda's timestamp variable
     '''
     if time_period == "d":
+        today -= pd.to_timedelta(1, 'D')
         return today
     elif time_period == "w":
         for i in range(7):
@@ -67,18 +78,29 @@ def GetSubCategory(cid):
     response = requests.get(url = url, headers = header)
     return response.json()
 
-def GetKeyWordRank(cid, startDate, endDate):
+def GetKeyWordRank(cid, startDate: str, endDate: str) -> list:
     '''
     cid is the category id
     returns: response.json, the response from the server in json format
     '''
     global header
-    data = f"cid={cid}&timeUnit=date&startDate={startDate}&endDate={endDate}&age=&gender=&device=&page=1&count=10"
     url = "https://datalab.naver.com/shoppingInsight/getCategoryKeywordRank.naver"
-    response = requests.post(url=url, headers=header, data=data)
-    return response.json()
 
-def GetJSON(startDate, endDate):
+    result = []
+    for i in tqdm(range(1, 26)): #tqdm prints out the PROGRESS BAR TO THE TERMINAL
+        data = f"cid={cid}&timeUnit=date&startDate={startDate}&endDate={endDate}&age=&gender=&device=&page={i}&count=20"
+        response = requests.post(url=url, headers=header, data=data)
+        print(response.status_code())
+        response = response.json() #GETTING THE RESPONSE
+
+        for i in range(20):
+            #APPENDIND EACH KEYWORDS TO THE RESULT
+            result.append(response['ranks'][i]['keyword'])
+
+        time.sleep(0.5)
+    return result
+
+def GetJSON(startDate: str, endDate: str) -> json:
     '''
     Returns a JSON variable that contains the top 10 searcheds keywords for each categories.
     '''
@@ -91,18 +113,17 @@ def GetJSON(startDate, endDate):
 
     for cat_name, cat_id in cid_lists.items():
         print(cat_name)
-        temporary_dict = GetKeyWordRank(cat_id, startDate, endDate) #Get the top 10 keywords into temporary_dict dictionary. This dictionary only stores the top 10 keywords of one category.
-        result_keyword[cat_name] = [] #creates another item in the dictionary with the category's name as the key, and an empty array as the value.
-        for i in range(10):
-            #appends each category into the empty array that was just created
-            result_keyword[cat_name].append(temporary_dict['ranks'][i]['keyword'])
-        time.sleep(0.3) #without this, the server doesn't respond after the 생활/건강
+        temp = GetKeyWordRank(cat_id, startDate, endDate) #Get the top 500 keywords into temporary list.
+        result_keyword[cat_name] = []
+        result_keyword[cat_name] += temp
+        DisplayTimer(30)
+
 
     return json.dumps(result_keyword, indent=4, ensure_ascii=False) #Turns dictionary into json file. 'ensure_ascii=False' is to solve bugs with Korean characters.
 
-def GetCSV(startDate, endDate):
+def GetCSV(startDate: str, endDate: str) -> pd.DataFrame:
     '''
-    Returns a dataframe variable that contains the top 10 searcheds keywords for each categories.
+    Returns a dataframe variable that contains the top 500 searched keywords for each categories.
     '''
     global cid_lists
     result_dataframe = {
@@ -112,14 +133,11 @@ def GetCSV(startDate, endDate):
     }
     for cat_name, cat_id in cid_lists.items():
         print(cat_name)
-        temporary_dict = GetKeyWordRank(cat_id, startDate, endDate) #Get the top 10 keywords into temporary_dict dictionary. This dictionary only stores the top 10 keywords of one category.
-        for i in range(10):
-            #appends name and id of each category name to the "Category_name" and "Cat_id" column.
-            result_dataframe["Category_name"].append(cat_name)
-            result_dataframe["Cat_id"].append(cat_id)
-            #appends each keywords into the "Keywords" column
-            result_dataframe["Keywords"].append(temporary_dict['ranks'][i]['keyword'])
-        time.sleep(0.3) #without this, the server doesn't respond after the 생활/건강
+        temp = GetKeyWordRank(cat_id, startDate, endDate) #Get the top 500 keywords into temporary list.
+        result_dataframe["Category_name"] += [cat_name] * 500
+        result_dataframe["Cat_id"] += [cat_id] * 500
+        result_dataframe["Keywords"] += temp
+        DisplayTimer(30)
     
     return pd.DataFrame(result_dataframe)
 

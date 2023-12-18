@@ -1,7 +1,7 @@
-import requests, time, json, pprint, sys
+import custom_exceptions, reusable_funcs
 from tabulate import tabulate
+import requests, time, json
 from datetime import date
-import custom_exceptions
 from tqdm import tqdm
 import pandas as pd
 
@@ -33,16 +33,6 @@ header = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
     "Content-Type" : "application/x-www-form-urlencoded; charset=UTF-8"
 }
-
-def DisplayTimer(t: int):
-    '''
-    Prints out the timer into the terminal
-    '''
-    print("\nTimer Starting:")
-    for i in range(t,0,-1):
-        sys.stdout.write(str(i)+' ')
-        sys.stdout.flush()
-        time.sleep(1)
 
 def GetEndDate():
     '''
@@ -123,7 +113,7 @@ def GetJSON(startDate: str, endDate: str) -> json:
             print(e)
         result_keyword[cat_name] = []
         result_keyword[cat_name] += temp
-        DisplayTimer(30)
+        reusable_funcs.DisplayTimer(30)
 
 
     return json.dumps(result_keyword, indent=4, ensure_ascii=False) #Turns dictionary into json file. 'ensure_ascii=False' is to solve bugs with Korean characters.
@@ -150,7 +140,7 @@ def GetCSV(startDate: str, endDate: str) -> pd.DataFrame:
         result_dataframe["Keywords"] += temp
     
         if i < len(cid_lists) - 1:  # Check if it's not the last iteration
-            DisplayTimer(30)
+            reusable_funcs.DisplayTimer(30)
 
     
     return pd.DataFrame(result_dataframe)
@@ -178,7 +168,7 @@ def main():
         print(f"Session{j+1}:")
         print("=" * 100)
         result_dataframe = GetCSV(startDate[j], endDate)
-        DisplayTimer
+        reusable_funcs.DisplayTimer(30)
         result_dataframe.to_csv(f"./data/{time_period[j]}_top10_keywords.csv", encoding="euc-kr", index=False) #saves the data into the "data" directory
     
 if __name__ == "__main__":

@@ -1,5 +1,8 @@
+#PLEASE READ THIS!!!!!
+#THIS 'API_KEYS' IS A LOCAL PYTHON FILE OF MINE IN MY LOCAL PC THAT SOTERS MY PRIVATE API KEYS.
+from API_KEYS import * #SO DELETE THIS LINE!!!!!
+
 import hashlib, hmac, base64
-from API_KEYS import *
 import time
 
 class AdAPI():

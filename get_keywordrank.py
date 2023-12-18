@@ -1,6 +1,7 @@
 import requests, time, json, pprint, sys
 from tabulate import tabulate
 from datetime import date
+import custom_exceptions
 from tqdm import tqdm
 import pandas as pd
 
@@ -37,6 +38,7 @@ def DisplayTimer(t: int):
     '''
     Prints out the timer into the terminal
     '''
+    print("\nTimer Starting:")
     for i in range(t,0,-1):
         sys.stdout.write(str(i)+' ')
         sys.stdout.flush()
@@ -90,7 +92,9 @@ def GetKeyWordRank(cid, startDate: str, endDate: str) -> list:
     for i in tqdm(range(1, 26)): #tqdm prints out the PROGRESS BAR TO THE TERMINAL
         data = f"cid={cid}&timeUnit=date&startDate={startDate}&endDate={endDate}&age=&gender=&device=&page={i}&count=20"
         response = requests.post(url=url, headers=header, data=data)
-        print(response.status_code())
+
+        if response.status_code != 200:
+            raise custom_exceptions.ResponseError(response.status_code)
         response = response.json() #GETTING THE RESPONSE
 
         for i in range(20):
@@ -113,7 +117,10 @@ def GetJSON(startDate: str, endDate: str) -> json:
 
     for cat_name, cat_id in cid_lists.items():
         print(cat_name)
-        temp = GetKeyWordRank(cat_id, startDate, endDate) #Get the top 500 keywords into temporary list.
+        try:
+            temp = GetKeyWordRank(cat_id, startDate, endDate) #Get the top 500 keywords into temporary list.
+        except custom_exceptions.ResponseError as e:
+            print(e)
         result_keyword[cat_name] = []
         result_keyword[cat_name] += temp
         DisplayTimer(30)
@@ -131,13 +138,20 @@ def GetCSV(startDate: str, endDate: str) -> pd.DataFrame:
         "Cat_id":[],
         "Keywords":[]
     }
-    for cat_name, cat_id in cid_lists.items():
-        print(cat_name)
-        temp = GetKeyWordRank(cat_id, startDate, endDate) #Get the top 500 keywords into temporary list.
+    for i, (cat_name, cat_id) in enumerate(cid_lists.items()):
+        print("\nCategory:", cat_name)
+        try:
+            temp = GetKeyWordRank(cat_id, startDate, endDate) #Get the top 500 keywords into temporary list.
+        except custom_exceptions.ResponseError as e:
+            print(e)
+        
         result_dataframe["Category_name"] += [cat_name] * 500
         result_dataframe["Cat_id"] += [cat_id] * 500
         result_dataframe["Keywords"] += temp
-        DisplayTimer(30)
+    
+        if i < len(cid_lists) - 1:  # Check if it's not the last iteration
+            DisplayTimer(30)
+
     
     return pd.DataFrame(result_dataframe)
 
@@ -153,9 +167,18 @@ def main():
         startDate.append(temp.strftime('%Y-%m-%d')) #Turns the date from, panda's timestamp data structure, to string
     endDate = endDate.strftime('%Y-%m-%d')
 
+    response = requests.get('https://api.ipify.org?format=json')
+    data = response.json()
+    ip_address = data['ip']
+
+    print("Your IP address is:", ip_address)
+
     #2. Gets data frame then save as csv file, for each time_period(day, week and month)
     for j in range(3):
+        print(f"Session{j+1}:")
+        print("=" * 100)
         result_dataframe = GetCSV(startDate[j], endDate)
+        DisplayTimer
         result_dataframe.to_csv(f"./data/{time_period[j]}_top10_keywords.csv", encoding="euc-kr", index=False) #saves the data into the "data" directory
     
 if __name__ == "__main__":

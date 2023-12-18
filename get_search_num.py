@@ -32,7 +32,7 @@ def GetNumSearch(keywords, ad_api):
 		data_response = data_response['keywordList'][:5]
 		return data_response
 	else:
-		raise custom_exceptions.ResponseError("Response Error: ", response.status_code)
+		raise custom_exceptions.ResponseError(response.status_code)
 
 def SortResponse(arr1, arr2):
 	'''

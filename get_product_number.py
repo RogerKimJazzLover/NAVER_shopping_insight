@@ -1,7 +1,9 @@
 from tabulate import tabulate
 from browser import Browser
 from urllib import parse
+from tqdm import tqdm
 import pandas as pd
+import reusable_funcs
 import time
 
 def GetPageSource(browser, keyword: str) -> str:
@@ -21,7 +23,7 @@ def GetProductNumber(page_source: str) -> int:
     return product_num
 
 def main():
-    data = pd.read_csv("./data/d_top10_keywords.csv", encoding='euc-kr')
+    data = pd.read_csv("./data/m_top10_keywords.csv", encoding='euc-kr')
     keywords = list(data["Keywords"])
     search_nums = list(data["Monthly_num_search"])
 
@@ -31,19 +33,19 @@ def main():
     }
 
     browser = Browser()
-    browser.driver.get("https://whatismyipaddress.com")
-    for i in range(9):
+    #browser.driver.get("https://whatismyipaddress.com")
+    for i in tqdm(range(6000)):
         page_source = GetPageSource(browser, keywords[i])
         product_num = GetProductNumber(page_source)
 
         new_data["Prodcut_num"].append(product_num)
-        new_data["Competitive_index"].append(round(product_num / search_nums[i], 2))
-        if i > 1:
-            if i%10 == 0:
-                time.sleep(30)
-        else:
-            time.sleep(1)
-    
+        try:
+            new_data["Competitive_index"].append(round(product_num / search_nums[i], 2))
+        except ZeroDivisionError:
+            #IF THE SEARCH_NUM IS 0
+            new_data["Competitive_index"].append(0)
+
+        # time.sleep(0.5)
     browser.driver.quit()
 
     new_data = pd.DataFrame(new_data)
@@ -52,7 +54,7 @@ def main():
     data = pd.concat([data, new_data], axis=1)
     print(tabulate(data, headers='keys', tablefmt='psql'))
 
-    data.to_csv("./data/d_top10_keywords.csv", encoding='euc-kr', index=False)
+    data.to_csv("./data/m_top10_keywords.csv", encoding='euc-kr', index=False)
 
     return 0
 

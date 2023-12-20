@@ -59,8 +59,10 @@ def add_numSearch(table: pd.DataFrame, ad_api):
 	'''
 	Takes in the dataframe object 'table' which contains all the keywords
 	Returns nothing, instead, modifies the 'table' variable in the main function, since dataframes are mutable when passed as argument.
+	adds monthly search num, average click num and competitive index
 	'''
 	num_search = []
+	num_click = []
 	compIdx = []
 	for i in tqdm(range(5, 6001, 5)):
 		keywords = table["Keywords"][i-5:i]
@@ -71,13 +73,16 @@ def add_numSearch(table: pd.DataFrame, ad_api):
 			for k in range(5):
 				CheckCorruptData(data, k)
 				num_search.append(data[k]["monthlyMobileQcCnt"] + data[k]["monthlyPcQcCnt"])
+				num_click.append(data[k]["monthlyAvePcClkCnt"] + data[k]["monthlyAveMobileClkCnt"])
 				compIdx.append(data[k]["compIdx"])
 		except custom_exceptions.ReAttemptFail as e:
 			print(e.messaage)
 			num_search += [np.nan] * 5
+			num_click += [np.nan] * 5
 			compIdx += [np.nan] * 5
 			
 	table["Monthly_num_search"] = num_search
+	table["Avg_monthly_click"] = num_search
 	table["Competitiveness"] = compIdx
 
 def main():       

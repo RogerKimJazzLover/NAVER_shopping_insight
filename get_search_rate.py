@@ -5,8 +5,8 @@ import json
 def main():
     datalab_api = DatalabSearchAPI()
 
-    keywords_groups = datalab_api.CreateKeywordsGroups(group_name="숏패딩", keywords="숏패딩")
-    body = datalab_api.CreateBody(startDate="2017-08-01", endDate="2017-08-01", keywords_groups=keywords_groups)
+    keywords_groups = datalab_api.CreateKeywordsGroups(group_name="숏패딩", keywords=["숏패딩"])
+    body = datalab_api.CreateBody(startDate="2023-11-20", endDate="2023-12-20", keywords_groups=keywords_groups)
     response = datalab_api.GetResponse(body)
     rescode = response.getcode()
 

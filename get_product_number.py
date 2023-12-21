@@ -48,15 +48,10 @@ def main():
         # time.sleep(0.5)
     browser.driver.quit()
 
+    #APPENDING THE NEW DATA TO THE OLD DATA
     new_data = pd.DataFrame(new_data)
-    print(tabulate(new_data, headers='keys', tablefmt='psql'))
-
     data = pd.concat([data, new_data], axis=1)
-    print(tabulate(data, headers='keys', tablefmt='psql'))
-
     data.to_csv("./data/m_top10_keywords.csv", encoding='euc-kr', index=False)
-
-    return 0
 
 if __name__ == "__main__":
     main()

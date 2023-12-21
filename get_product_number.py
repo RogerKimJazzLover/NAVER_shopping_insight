@@ -1,9 +1,8 @@
-from tabulate import tabulate
+import reusable_funcs, custom_exceptions
 from browser import Browser
 from urllib import parse
 from tqdm import tqdm
 import pandas as pd
-import reusable_funcs
 import time
 
 def GetPageSource(browser, keyword: str) -> str:
@@ -14,9 +13,15 @@ def GetPageSource(browser, keyword: str) -> str:
     page_source = browser.getPageSource()
     return page_source
 
-def GetProductNumber(page_source: str) -> int:
+@reusable_funcs.ReAttemptUntilFailure(max_attempt=5, time=30)
+def GetProductNumber(browser, keyword: str) -> int:
     #GETTING THE PRODUCT NUMBER
+    page_source = GetPageSource(browser, keyword)
     start_index = page_source.find('<span class="subFilter_num__S9sle">')
+    if start_index == -1:
+        raise custom_exceptions.ResponseError(status_code=600) 
+        #START_INDEX == -1 MEANS THE RESPONSE IS CORRUPT
+        #STATUS CODE 600 cuz occured at crawling. Don't really know the real status code.
     desired_part = page_source[start_index+35:start_index+35+15]
     desired_part = desired_part.split("<")
     product_num = int(desired_part[0].replace(',', ''))
@@ -35,17 +40,14 @@ def main():
     browser = Browser()
     #browser.driver.get("https://whatismyipaddress.com")
     for i in tqdm(range(6000)):
-        page_source = GetPageSource(browser, keywords[i])
-        product_num = GetProductNumber(page_source)
-
-        new_data["Prodcut_num"].append(product_num)
+        product_num = GetProductNumber(browser, keywords[i])
         try:
+            new_data["Prodcut_num"].append(product_num)
             new_data["Competitive_index"].append(round(product_num / search_nums[i], 2))
         except ZeroDivisionError:
             #IF THE SEARCH_NUM IS 0
             new_data["Competitive_index"].append(0)
-
-        # time.sleep(0.5)
+        time.sleep(0.5)
     browser.driver.quit()
 
     #APPENDING THE NEW DATA TO THE OLD DATA

@@ -40,18 +40,24 @@ class DatalabSearchAPI():
         self.client_secret = data_lab_search_client_secret #type your own client_secret here.
         self.url = "https://openapi.naver.com/v1/datalab/search"
     
-    def CreateKeywordsGroups(self, group_name: str, keywords: list):
+    def CreateKeywordsGroups(self, keywords: list) -> dict:
+        '''
+        Arguments: list of five keywords
+        Returns: dictionary containing the infos
+        This process is required because the http body requires the keywords to be in specific format.
+        '''
         keyword_groups = []
 
-        keyword_group = {
-            'groupName': group_name,
-            'keywords': keywords
-        }
-        
-        keyword_groups.append(keyword_group)
+        for i in range(5):
+            keyword_group = {
+                'groupName': keywords[i],
+                'keywords': [keywords[i]]
+            }
+            keyword_groups.append(keyword_group)
+
         return keyword_groups
 
-    def CreateBody(self, startDate: str, endDate: str, keywords_groups: list):
+    def CreateBody(self, startDate: str, endDate: str, keywords_groups: list) -> json:
         body = {
             "startDate": startDate,
             "endDate": endDate,

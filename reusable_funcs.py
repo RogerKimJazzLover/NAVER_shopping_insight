@@ -1,4 +1,6 @@
 import custom_exceptions
+from datetime import date
+import pandas as pd
 import sys, time
 
 def DisplayTimer(t: int):
@@ -40,3 +42,26 @@ def ReAttemptUntilFailure(max_attempt: int, time: int):
             return data
         return wrapper
     return ReAttemptUntilFailureFunction
+
+def GetEndDate() -> pd.Timestamp:
+    '''
+    Returns yesterday in panda's timestamp variable
+    '''
+    today = date.today()
+    today = pd.to_datetime(today)
+    today -= pd.to_timedelta(1, 'D')
+    return today
+
+def GetStartDate(today: pd.Timestamp, time_period: str) -> pd.Timestamp:
+    '''
+    Returns a day/week/month ago from the given argument: today, in panda's timestamp variable
+    '''
+    if time_period == "d":
+        today -= pd.to_timedelta(1, 'D')
+        return today
+    elif time_period == "w":
+        for i in range(7):
+            today -= pd.to_timedelta(1, 'D')
+        return today
+    else:
+        return today - pd.DateOffset(months=1)

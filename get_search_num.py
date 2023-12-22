@@ -87,9 +87,9 @@ def add_numSearch(table: pd.DataFrame, ad_api):
 
 def main():       
 	ad_api = AdAPI()
-	table = pd.read_csv(f"./data/m_top10_keywords.csv", encoding="euc-kr") #Reads the table into a dataframe object
+	table = pd.read_csv(f"./data/m_top10_keywords.csv", encoding="euc-kr")
 	add_numSearch(table, ad_api) #Modifies the table so that it contains the monthly number of searches
-	table.to_csv(f"./data/m_top10_keywords.csv", encoding="euc-kr", index=False) #Saves the dataframe as a csv file.
+	table.to_csv(f"./data/m_top10_keywords.csv", encoding="euc-kr", index=False)
 
 if __name__ == "__main__":
       main()

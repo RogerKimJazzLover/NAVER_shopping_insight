@@ -33,29 +33,6 @@ header = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
     "Content-Type" : "application/x-www-form-urlencoded; charset=UTF-8"
 }
-
-def GetEndDate():
-    '''
-    Returns yesterday in panda's timestamp variable
-    '''
-    today = date.today()
-    today = pd.to_datetime(today)
-    today -= pd.to_timedelta(1, 'D')
-    return today
-
-def GetStartDate(today, time_period):
-    '''
-    Returns a day/week/month ago from the given argument: today, in panda's timestamp variable
-    '''
-    if time_period == "d":
-        today -= pd.to_timedelta(1, 'D')
-        return today
-    elif time_period == "w":
-        for i in range(7):
-            today -= pd.to_timedelta(1, 'D')
-        return today
-    else:
-        return today - pd.DateOffset(months=1)
     
 def GetSubCategory(cid):
     '''
@@ -150,18 +127,12 @@ def main():
     time_period = ['d', 'w', 'm']
 
     #1. Getting the startDate for each time period
-    endDate = GetEndDate()
+    endDate = reusable_funcs.GetEndDate()
     startDate = []
     for i in range(3):
-        temp = GetStartDate(endDate, time_period[i])
+        temp = reusable_funcs.GetStartDate(endDate, time_period[i])
         startDate.append(temp.strftime('%Y-%m-%d')) #Turns the date from, panda's timestamp data structure, to string
     endDate = endDate.strftime('%Y-%m-%d')
-
-    response = requests.get('https://api.ipify.org?format=json')
-    data = response.json()
-    ip_address = data['ip']
-
-    print("Your IP address is:", ip_address)
 
     #2. Gets data frame then save as csv file, for each time_period(day, week and month)
     for j in range(3):

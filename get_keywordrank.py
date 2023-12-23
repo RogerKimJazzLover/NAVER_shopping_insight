@@ -136,7 +136,7 @@ def main():
 
     #2. Gets data frame then save as csv file, for each time_period(day, week and month)
     for j in range(3):
-        print(f"Session{j+1}:")
+        print(f"\nSession{j+1}:")
         print("=" * 100)
         result_dataframe = GetCSV(startDate[j], endDate)
         reusable_funcs.DisplayTimer(30)

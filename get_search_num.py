@@ -82,7 +82,7 @@ def add_numSearch(table: pd.DataFrame, ad_api):
 			compIdx += [np.nan] * 5
 			
 	table["Monthly_num_search"] = num_search
-	table["Avg_monthly_click"] = num_search
+	table["Avg_monthly_click"] = num_click
 	table["Competitiveness"] = compIdx
 
 def main():       

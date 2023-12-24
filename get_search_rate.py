@@ -59,7 +59,11 @@ def main():
     keywords = list(table["Keywords"])
 
     #2. Getting the endDate(yesterday) and startDate(1 month ago)
-    endDate = reusable_funcs.GetEndDate()
+    if "2" in file_name:
+        endDate = reusable_funcs.GetEndDate()
+        endDate -= pd.to_timedelta(1, 'D') #SUBTRACTS AN EXTRA DAY WHEN WORKING WITH THE SECOND HALF OF THE TABLE, TO MAKE THE DATES THE SAME.
+    else:
+        endDate = reusable_funcs.GetEndDate()
     startDate = reusable_funcs.GetStartDate(endDate, 'm')
     days_list = GetDaysList(startDate, endDate)
     endDate = endDate.strftime('%Y-%m-%d')

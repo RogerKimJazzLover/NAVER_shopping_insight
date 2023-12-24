@@ -21,6 +21,7 @@ def main():
     file1 = "get_keywordrank.py"
     file2 = "get_search_num.py"
     file3 = "get_search_rate.py"
+    file4 = "get_daily_search.py"
     
     #1. GETTING THE TOP 500 KEYWORDS FOR EACH CATEGORIES FOR D/W/M
     print("\nSYSTEM: Creating d/w/m top10 keywords csv file......")
@@ -71,12 +72,18 @@ def main():
             print("\nSYSTEM: deleted './data/m_search_ratios_1.csv'")
             os.remove("./data/m_search_ratios_2.csv")
             print("\nSYSTEM: deleted './data/m_search_ratios_2.csv'")
-            print('-'*45, "DONE!", '-'*45)
             break
         else:
             print("\nSYSTEM: Very good sir. I'll come back in a minute.\nWaiting.......")
             reusable_funcs.DisplayTimer(60)
             continue
+
+    #6. Calculating the daily search for each keywords for the past month
+    print("\nSYSTEM: m_daily_search csv file......")
+    print('#' * 100)
+    subprocess.run(['python', file4])
+    print("\nSYSTEM: Finished creating top10 keywords csv files!")
+    print('-'*45, "DONE!", '-'*45)
 
 if __name__ == "__main__":
     main()

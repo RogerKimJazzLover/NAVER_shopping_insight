@@ -38,7 +38,7 @@ def main():
     #3. SEPERATE THE 'm_top10_keywords.csv' INTO TWO BECAUSE THE NAVER API CAN ONLY BE CALLED 1,000 TIMES A DAY
     #   BUT WE HAVE 1,200 ITEMS! SO HAVE TO RUN AT LIKE 11:30 P.M THEN WAIT FOR THE NEXT DAY AND RUN THE REST.
     print("\nSYSTEM: Seperated m_top10_keywords.csv into two!")
-    # SeperateTable()
+    SeperateTable()
 
     #4. GETTING THE SEARCH RATE FOR THE FIRST HALF OF THE TABLE
     print("\nSYSTEM: Appending search ratio to the first table.......")
@@ -52,7 +52,7 @@ def main():
     while(True):
         #RUNS AFTER THE CONFIRMATION FROM THE USER
         #MAKE SURE IT IS RAN ON ANOTHER DAY!
-        a = input("SYSTEM: Ready to run the second file, Sir?\n[y/n]: ")
+        a = input("\nSYSTEM: Ready to run the second file, Sir?\n[y/n]: ")
         if a == 'y':
             os.environ['FILE_NAME'] = "./data/m_top10_keywords_2.csv"
             os.environ['SAVE_AS'] = "./data/m_search_ratios_2.csv"
@@ -83,7 +83,7 @@ def main():
     print('#' * 100)
     subprocess.run(['python', file4])
     print("\nSYSTEM: Finished creating top10 keywords csv files!")
-    print('-'*45, "DONE!", '-'*45)
+    print('-'*50, "DONE!", '-'*50)
 
 if __name__ == "__main__":
     main()

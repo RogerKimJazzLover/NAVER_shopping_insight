@@ -4,9 +4,9 @@ import pandas as pd
 def main():
     table = pd.read_csv("./data/test_search_ratio.csv", encoding="euc-kr")
     search_rates = table.drop(table.columns[[0,1,2,3,4,5]], axis=1)
-    sum = search_rates.sum()
+    sum = search_rates.sum(axis=1)
     x_factor = table["Monthly_num_search"] / (sum[0] / 100)
-    daily_search = (search_rates / 100) * x_factor[0]
+    daily_search = search_rates.mul(x_factor, axis="index") / 100
     daily_search["Keywords"] = table["Keywords"]
 
     new_table = table.iloc[:, [0,1,2]]

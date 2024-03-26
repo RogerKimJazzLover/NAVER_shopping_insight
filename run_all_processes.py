@@ -1,6 +1,8 @@
-import reusable_funcs
+from datetime import datetime, timedelta
+from tqdm import trange
 import subprocess, os
 import pandas as pd
+import time
 
 def SeperateTable():
     table = pd.read_csv("./data/m_top10_keywords.csv", encoding="euc-kr")
@@ -18,6 +20,11 @@ def CombineTable():
     table1.to_csv("./data/m_search_ratios.csv", encoding="euc-kr", index=False)
 
 def main():
+    today = datetime.today()
+    tomorrow = datetime.now() + timedelta(days=1)
+    tomorrow = tomorrow.replace(hour=0, minute=0, second=5, microsecond=0)
+    start_date = today.date()
+
     file1 = "get_keywordrank.py"
     file2 = "get_search_num.py"
     file3 = "get_search_rate.py"
@@ -52,8 +59,9 @@ def main():
     while(True):
         #RUNS AFTER THE CONFIRMATION FROM THE USER
         #MAKE SURE IT IS RAN ON ANOTHER DAY!
-        a = input("\nSYSTEM: Ready to run the second file, Sir?\n[y/n]: ")
-        if a == 'y':
+        current_date = datetime.today().date()
+        day_passed = (start_date != current_date)
+        if day_passed:
             os.environ['FILE_NAME'] = "./data/m_top10_keywords_2.csv"
             os.environ['SAVE_AS'] = "./data/m_search_ratios_2.csv"
 
@@ -74,8 +82,10 @@ def main():
             print("\nSYSTEM: deleted './data/m_search_ratios_2.csv'")
             break
         else:
-            print("\nSYSTEM: Very good sir. I'll come back in a minute.\nWaiting.......")
-            reusable_funcs.DisplayTimer(60)
+            time_til_tmr = (tomorrow - datetime.now()).total_seconds()
+            print(f"\nSYSTEM: Time left until tommorrow {time_til_tmr} seconds. Proceed to continue after {time_til_tmr} seconds")
+            for _ in trange(int(time_til_tmr), desc="대기 중", unit="sec"):
+                time.sleep(1)
             continue
 
     #6. Calculating the daily search for each keywords for the past month

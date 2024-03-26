@@ -1,4 +1,4 @@
-# Basic Financial Data
+# NAVER Shopping Insight
 
 ## 🛠️ Description
 

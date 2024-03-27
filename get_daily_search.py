@@ -21,7 +21,7 @@ def main():
     daily_search = search_rates.mul(x_factor, axis="index") / 100
     round_to_int(daily_search)
 
-    new_table = table.iloc[:, [0,1,2]]
+    new_table = table.iloc[:, [0,1,2,3,5]]
     new_table = pd.merge(left=new_table, right=daily_search, left_index=True, right_index=True)
     new_table = new_table.drop_duplicates(subset='Keywords')
     new_table.to_csv("./data/m_daily_search.csv", encoding = "euc-kr", index=False)
